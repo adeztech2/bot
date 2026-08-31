@@ -11,6 +11,7 @@
     "node": "20.11.1"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.57.0",
     "@whiskeysockets/baileys": "6.7.18",
     "adm-zip": "^0.5.16",
     "dotenv": "^16.6.1",
