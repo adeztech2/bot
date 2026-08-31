@@ -1,0 +1,22 @@
+{
+  "name": "bot",
+  "version": "1.0.0",
+  "description": "WhatsApp Bot powered by Baileys",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "engines": {
+    "node": "20.11.1"
+  },
+  "dependencies": {
+    "@whiskeysockets/baileys": "6.7.18",
+    "adm-zip": "^0.5.16",
+    "dotenv": "^16.6.1",
+    "express": "^5.1.0",
+    "pino": "^9.9.0",
+    "qrcode": "^1.5.4",
+    "socket.io": "^4.8.1"
+  }
+}
