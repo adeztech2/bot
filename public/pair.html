@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>Bot | WhatsApp Pairing</title>
+
+  <script src="/socket.io/socket.io.js"></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      background: #050505;
+      color: white;
+
+      display: flex;
+      justify-content: center;
+      align-items: center;
+
+      padding: 20px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 430px;
+
+      background: #101010;
+
+      border: 1px solid #222;
+
+      border-radius: 20px;
+
+      padding: 30px;
+
+      text-align: center;
+
+      box-shadow:
+        0 20px 60px rgba(0, 0, 0, .5);
+    }
+
+    h1 {
+      font-size: 30px;
+      margin-bottom: 10px;
+    }
+
+    .subtitle {
+      color: #aaa;
+      margin-bottom: 25px;
+    }
+
+    input {
+      width: 100%;
+
+      padding: 15px;
+
+      background: #181818;
+
+      border: 1px solid #333;
+
+      border-radius: 10px;
+
+      color: white;
+
+      outline: none;
+
+      margin-bottom: 12px;
+    }
+
+    button {
+      width: 100%;
+
+      padding: 15px;
+
+      border: 0;
+
+      border-radius: 10px;
+
+      background: #25D366;
+
+      color: #000;
+
+      font-weight: bold;
+
+      cursor: pointer;
+    }
+
+    button:hover {
+      opacity: .9;
+    }
+
+    #status {
+      margin-top: 20px;
+
+      color: #aaa;
+    }
+
+    #qr {
+      width: 260px;
+
+      max-width: 100%;
+
+      margin: 20px auto;
+
+      display: none;
+
+      background: white;
+
+      padding: 10px;
+
+      border-radius: 10px;
+    }
+
+    #pairCode {
+      margin-top: 20px;
+
+      font-size: 28px;
+
+      letter-spacing: 5px;
+
+      font-weight: bold;
+
+      word-break: break-all;
+    }
+
+    .instructions {
+      margin-top: 20px;
+
+      text-align: left;
+
+      color: #aaa;
+
+      line-height: 1.6;
+
+      font-size: 14px;
+    }
+
+    .online {
+      color: #25D366;
+      font-weight: bold;
+    }
+
+    .error {
+      color: #ff5555;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+
+    <h1>🤖 Bot</h1>
+
+    <p class="subtitle">
+      WhatsApp Pairing
+    </p>
+
+    <input
+      id="number"
+      type="text"
+      placeholder="254XXXXXXXXX"
+      autocomplete="off"
+    >
+
+    <button
+      id="pairButton"
+      onclick="requestPair()"
+    >
+      Get Pairing Code
+    </button>
+
+    <p id="status">
+      Connecting to bot server...
+    </p>
+
+    <img
+      id="qr"
+      alt="WhatsApp QR Code"
+    >
+
+    <div id="pairCode"></div>
+
+    <div class="instructions">
+
+      <strong>QR method:</strong><br>
+
+      Open WhatsApp → Linked Devices →
+      Link a Device → Scan the QR code.
+
+      <br><br>
+
+      <strong>Pair-code method:</strong><br>
+
+      Enter your WhatsApp number with country
+      code, without the + sign.
+
+    </div>
+
+  </div>
+
+<script>
+
+const socket = io()
+
+const statusElement =
+  document.getElementById('status')
+
+const qrElement =
+  document.getElementById('qr')
+
+const pairCodeElement =
+  document.getElementById('pairCode')
+
+socket.on('connect', () => {
+
+  statusElement.textContent =
+    '🟢 Connected to bot server.'
+
+})
+
+socket.on('status', data => {
+
+  if (data.connected) {
+
+    statusElement.innerHTML =
+      '<span class="online">✅ WhatsApp connected</span>'
+
+  } else if (data.connecting) {
+
+    statusElement.textContent =
+      '🔄 Connecting to WhatsApp...'
+
+  } else {
+
+    statusElement.textContent =
+      '⏳ Waiting for WhatsApp...'
+
+  }
+
+})
+
+socket.on('qr', data => {
+
+  qrElement.src = data.qr
+
+  qrElement.style.display =
+    'block'
+
+  pairCodeElement.textContent = ''
+
+  statusElement.textContent =
+    '📲 Scan this QR code with WhatsApp.'
+
+})
+
+socket.on('pair-code', data => {
+
+  qrElement.style.display =
+    'none'
+
+  pairCodeElement.textContent =
+    data.code
+
+  statusElement.textContent =
+    '✅ Pairing code generated.'
+
+})
+
+socket.on('pair-error', message => {
+
+  statusElement.innerHTML =
+    '<span class="error">❌ ' +
+    message +
+    '</span>'
+
+})
+
+function requestPair() {
+
+  const number =
+    document
+      .getElementById('number')
+      .value
+      .trim()
+
+  if (!number) {
+
+    statusElement.innerHTML =
+      '<span class="error">Enter your WhatsApp number.</span>'
+
+    return
+
+  }
+
+  pairCodeElement.textContent = ''
+
+  qrElement.style.display =
+    'none'
+
+  statusElement.textContent =
+    '⏳ Generating pairing code...'
+
+  socket.emit(
+    'request-pair-code',
+    number
+  )
+
+}
+
+</script>
+
+</body>
+      </html>
